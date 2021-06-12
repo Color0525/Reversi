@@ -5,19 +5,46 @@ using UnityEngine.UI;
 
 public class Reversi : MonoBehaviour
 {
+    [SerializeField] bool _blackAuto = false;
+    [SerializeField] bool _whiteAuto = true;
+
     [SerializeField] bool _isPlaying = false;
     [SerializeField] bool _isWhiteTurn = false;
-    [SerializeField] Text _turnText = null;
+
     [SerializeField] BoardCube _boardCubePrefab = null;
     [SerializeField] Stone _stonePrefab = null;
     [SerializeField] float _stoneOffset = 0.2f;
+
+    [SerializeField] Text _turnText = null;
+    [SerializeField] Text _blackText = null;
+    [SerializeField] Text _whiteText = null;
+    [SerializeField] Image _gameStatePanel = null;
+    [SerializeField] Text _gameStateText = null;
     int _rows = 8;
     int _columns = 8;
     BoardCube[,] _boardCubes;
+    float delayCount = 0;
 
     void Start()
     {
         _boardCubes = new BoardCube[_rows, _columns];
+        Setup();
+    }
+
+    void Update()
+    {
+        if (!_isPlaying) return;
+        if (_blackAuto && !_isWhiteTurn)
+        {
+
+        }    
+    }
+
+    /// <summary>
+    /// 盤面をセットアップ
+    /// </summary>
+    public void Setup()/////////// ＜_boardCubesの要素をデストロイする
+    {
         for (int r = 0; r < _rows; r++)
         {
             for (int c = 0; c < _columns; c++)
@@ -26,7 +53,6 @@ public class Reversi : MonoBehaviour
                 _boardCubes[r, c].transform.position = new Vector3(c - 3.5f, 0, -r + 3.5f);
                 _boardCubes[r, c]._row = r;
                 _boardCubes[r, c]._column = c;
-                //_boardCubes[r, c].SetIndex(r, c);
             }
         }
         PlaceStone(_boardCubes[3, 3]);
@@ -38,9 +64,64 @@ public class Reversi : MonoBehaviour
         PlaceStone(_boardCubes[4, 4]);
         _boardCubes[4, 4]._placedStone.IsWhite = true;
 
-        _isPlaying = true;
-        TurnBegin();
+        TurnUpdate(_isWhiteTurn);
+        BoardUpdate();
     }
+    
+    /// <summary>
+    /// ターンを更新
+    /// </summary>
+    void TurnUpdate(bool nextTurnIsWhite)
+    {
+        _isWhiteTurn = nextTurnIsWhite;
+
+        _turnText.text = _isWhiteTurn ? "白の番" : "黒の番";
+        _turnText.color = _isWhiteTurn ? Color.white : Color.black;
+    }
+
+    /// <summary>
+    /// 盤面やUIを更新
+    /// </summary>
+    void BoardUpdate()
+    {
+        int black = 0;
+        int white = 0;
+        foreach (var bc in _boardCubes)
+        {
+            if (bc._placedStone)
+            {
+                if (!bc._placedStone.IsWhite)
+                {
+                    black++;
+                }
+                else
+                {
+                    white++;
+                }
+            }
+        }
+        _blackText.text = $"黒 ： {black}";
+        _whiteText.text = $"白 ： {white}";
+
+        if (black + white != _rows * _columns)////////////////////置けないときパス、両者置けないとき終了
+        {
+            _isPlaying = true;
+            _gameStatePanel.gameObject.SetActive(false);
+            foreach (var bc in _boardCubes)
+            {
+                bc.CanBePlaced = bc._placedStone == null && GetTurnOverWhenPlaced(bc).Length > 0 ? true : false;
+            }
+        }
+        else
+        {
+            _isPlaying = false;
+            _gameStatePanel.gameObject.SetActive(true);
+            _gameStateText.text = black == white ? "引き分け"
+                : black > white ? "黒の勝ち"
+                : "白の勝ち";
+        }
+    }
+
 
     /// <summary>
     /// 石を置く
@@ -64,29 +145,8 @@ public class Reversi : MonoBehaviour
         }
 
         //ターン切り替え
-        _isWhiteTurn = _isWhiteTurn ? false : true;
-        TurnBegin();
-    }
-
-    /// <summary>
-    /// 手番を開始
-    /// </summary>
-    void TurnBegin()
-    {
-        _turnText.text = _isWhiteTurn ? "白の番" : "黒の番";
-        _turnText.color = _isWhiteTurn ? Color.white : Color.black;
-        foreach (var boardCube in _boardCubes)
-        {
-            boardCube.CanBePlaced = boardCube._placedStone == null && GetTurnOverWhenPlaced(boardCube).Length > 0 ? true : false;
-            //if (GetTurnOverWhenPlaced(boardCube) != null)
-            //{
-            //    boardCube.CanBePlaced = true;
-            //}
-            //else
-            //{
-
-            //}
-        }
+        TurnUpdate(!_isWhiteTurn);
+        BoardUpdate();
     }
 
     /// <summary>
@@ -135,18 +195,6 @@ public class Reversi : MonoBehaviour
                     }
                     dirR += i;
                     dirC += k;
-                    //if (bc._placedStone.IsWhite != _isWhiteTurn)
-                    //{
-                    //    lineTurnOverStones.Add(bc._placedStone);
-                    //}
-                    //else if (lineTurnOverStones.Count > 0)
-                    //{
-                    //    turnOverStones.AddRange(lineTurnOverStones);
-                    //}
-                    //else
-                    //{
-                    //    break;
-                    //}
                 }
             }
         }

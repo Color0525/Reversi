@@ -17,8 +17,7 @@ public class BoardCube : MonoBehaviour
         set 
         { 
             _canBePlaced = value;
-            Renderer ren = GetComponent<Renderer>();
-            ren.material.color = _canBePlaced ? ren.sharedMaterial.color + Color.white : Color.white;
+            GetComponent<Renderer>().material.color = _canBePlaced ? new Color(10, 2, 2) : Color.white;
             //if (_canBePlaced)
             //{
             //    ren.material.color += Color.white;
