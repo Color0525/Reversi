@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class Stone : MonoBehaviour
 {
-    [SerializeField] MeshRenderer _upRenderer = null;
-    [SerializeField] MeshRenderer _downRenderer = null;
-    [SerializeField] bool _isWhite = true;
+    //[SerializeField] MeshRenderer _upRenderer = null;
+    //[SerializeField] MeshRenderer _downRenderer = null;
+    [SerializeField] bool _isWhite = false;
     public bool IsWhite
     {
         get { return _isWhite; }
@@ -17,22 +17,27 @@ public class Stone : MonoBehaviour
         }
     }
 
-    private void OnValidate()
-    {
-        OnColorChanged();
-    }
+    //private void OnValidate()
+    //{
+    //    OnColorChanged();
+    //}
 
+    /// <summary>
+    /// èÛë‘Ç…ÇÊÇ¡ÇƒîíçïïœÇ¶ÇÈ
+    /// </summary>
     private void OnColorChanged()
     {
         if (_isWhite)
         {
-            _upRenderer.sharedMaterial.color = Color.white;
-            _downRenderer.sharedMaterial.color = Color.black;
+            transform.rotation = Quaternion.AngleAxis(180, Vector3.forward);
+            //_upRenderer.sharedMaterial.color = Color.white;
+            //_downRenderer.sharedMaterial.color = Color.black;
         }
         else
         {
-            _upRenderer.sharedMaterial.color = Color.black;
-            _downRenderer.sharedMaterial.color = Color.white;
+            transform.rotation = Quaternion.identity;
+            //_upRenderer.sharedMaterial.color = Color.black;
+            //_downRenderer.sharedMaterial.color = Color.white;
         }
 
     }
