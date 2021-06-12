@@ -13,7 +13,9 @@ public class Reversi : MonoBehaviour
 
     [SerializeField] BoardCube _boardCubePrefab = null;
     [SerializeField] Stone _stonePrefab = null;
+
     [SerializeField] float _stoneOffset = 0.2f;
+    [SerializeField] float _delayTime = 0.2f;
 
     [SerializeField] Text _turnText = null;
     [SerializeField] Text _blackText = null;
@@ -23,28 +25,11 @@ public class Reversi : MonoBehaviour
     int _rows = 8;
     int _columns = 8;
     BoardCube[,] _boardCubes;
-    float delayCount = 0;
+    float _delayCount = 0;
 
     void Start()
     {
         _boardCubes = new BoardCube[_rows, _columns];
-        Setup();
-    }
-
-    void Update()
-    {
-        if (!_isPlaying) return;
-        if (_blackAuto && !_isWhiteTurn)
-        {
-
-        }    
-    }
-
-    /// <summary>
-    /// 盤面をセットアップ
-    /// </summary>
-    public void Setup()/////////// ＜_boardCubesの要素をデストロイする
-    {
         for (int r = 0; r < _rows; r++)
         {
             for (int c = 0; c < _columns; c++)
@@ -55,6 +40,7 @@ public class Reversi : MonoBehaviour
                 _boardCubes[r, c]._column = c;
             }
         }
+
         PlaceStone(_boardCubes[3, 3]);
         _boardCubes[3, 3]._placedStone.IsWhite = true;
         PlaceStone(_boardCubes[3, 4]);
@@ -67,7 +53,71 @@ public class Reversi : MonoBehaviour
         TurnUpdate(_isWhiteTurn);
         BoardUpdate();
     }
-    
+
+    void Update()
+    {
+        if (!_isPlaying) return;
+
+        if (_blackAuto && !_isWhiteTurn || _whiteAuto && _isWhiteTurn)
+        {
+            _delayCount += Time.deltaTime;
+            if (_delayCount > _delayTime)
+            {
+                _delayCount = 0;
+
+                List<BoardCube> canBePlacedBoard = new List<BoardCube>();
+                foreach (var bc in _boardCubes)
+                {
+                    if (bc.CanBePlaced)// && !bc._placedStone)
+                    {
+                        canBePlacedBoard.Add(bc);
+                    }
+                }
+                PlaceStone(canBePlacedBoard[Random.Range(0, canBePlacedBoard.Count)]);
+            }
+        }
+        
+        
+    }
+
+    /// <summary>
+    /// リトライ
+    /// </summary>
+    public void Retry()
+    {
+        foreach (var bc in _boardCubes)
+        {
+            Destroy(bc.gameObject);
+        }
+        Start();
+    }
+
+    /// <summary>
+    /// 石を置く
+    /// </summary>
+    /// <param name="boardCube"></param>
+    public void PlaceStone(BoardCube boardCube)
+    {
+        Stone stone = Instantiate(_stonePrefab);
+        stone.IsWhite = _isWhiteTurn ? true : false;
+        Vector3 pos = new Vector3(boardCube.transform.position.x, boardCube.transform.position.y + _stoneOffset, boardCube.transform.position.z);
+        stone.transform.position = pos;
+        stone.transform.SetParent(boardCube.transform);
+        boardCube._placedStone = stone;
+
+        if (!_isPlaying) return;
+
+        //ひっくり返す
+        foreach (var turnOver in GetTurnOverWhenPlaced(boardCube))
+        {
+            turnOver.IsWhite = _isWhiteTurn ? true : false;
+        }
+
+        //ターン切り替え
+        TurnUpdate(!_isWhiteTurn);
+        BoardUpdate();
+    }
+
     /// <summary>
     /// ターンを更新
     /// </summary>
@@ -100,54 +150,51 @@ public class Reversi : MonoBehaviour
                 }
             }
         }
-        _blackText.text = $"黒 ： {black}";
-        _whiteText.text = $"白 ： {white}";
+        _blackText.text = $"黒 ：{black}";
+        _whiteText.text = $"白 ：{white}";
 
         if (black + white != _rows * _columns)////////////////////置けないときパス、両者置けないとき終了
         {
             _isPlaying = true;
             _gameStatePanel.gameObject.SetActive(false);
+
             foreach (var bc in _boardCubes)
             {
                 bc.CanBePlaced = bc._placedStone == null && GetTurnOverWhenPlaced(bc).Length > 0 ? true : false;
+                //if (bc._placedStone == null && GetTurnOverWhenPlaced(bc).Length > 0)
+                //{
+                //    bc.CanBePlaced = true;
+                //}
+                //else
+                //{
+                //    bc.CanBePlaced = false;
+                //}
             }
         }
         else
         {
             _isPlaying = false;
             _gameStatePanel.gameObject.SetActive(true);
-            _gameStateText.text = black == white ? "引き分け"
-                : black > white ? "黒の勝ち"
-                : "白の勝ち";
+            if (black == white)
+            {
+                _gameStateText.text = "引き分け";
+                _gameStateText.color = Color.gray;
+            }
+            else if (black > white)
+            {
+                _gameStateText.text = "黒の勝ち";
+                _gameStateText.color = Color.black;
+            }
+            else
+            {
+                _gameStateText.text = "白の勝ち";
+                _gameStateText.color = Color.white;
+            }
         }
     }
 
 
-    /// <summary>
-    /// 石を置く
-    /// </summary>
-    /// <param name="boardCube"></param>
-    public void PlaceStone(BoardCube boardCube)
-    {
-        Stone stone = Instantiate(_stonePrefab);
-        stone.IsWhite = _isWhiteTurn ? true : false;
-        Vector3 pos = new Vector3(boardCube.transform.position.x, boardCube.transform.position.y + _stoneOffset, boardCube.transform.position.z);
-        stone.transform.position = pos;
-        stone.transform.SetParent(boardCube.transform);
-        boardCube._placedStone = stone;
-
-        if (!_isPlaying) return;
-
-        //ひっくり返す
-        foreach (var turnOver in GetTurnOverWhenPlaced(boardCube))
-        {
-            turnOver.IsWhite = _isWhiteTurn ? true : false;
-        }
-
-        //ターン切り替え
-        TurnUpdate(!_isWhiteTurn);
-        BoardUpdate();
-    }
+    
 
     /// <summary>
     /// 指定マスに置かれたときに裏返る石を返す

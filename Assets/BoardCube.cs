@@ -58,7 +58,7 @@ public class BoardCube : MonoBehaviour
     /// </summary>
     public void Select()
     {
-        if (_canBePlaced && !_placedStone)
+        if (_canBePlaced)// && !_placedStone)
         {
             FindObjectOfType<Reversi>().PlaceStone(this);
         }
