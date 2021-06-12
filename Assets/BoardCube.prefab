@@ -109,7 +109,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee98af4817eb5024e83bc7661074449e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _onStone: 0
+  _placedStone: {fileID: 0}
 --- !u!114 &3398775435442697943
 MonoBehaviour:
   m_ObjectHideFlags: 0

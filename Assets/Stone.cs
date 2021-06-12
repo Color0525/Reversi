@@ -13,7 +13,19 @@ public class Stone : MonoBehaviour
         set
         {
             _isWhite = value;
-            OnColorChanged();
+            //OnColorChanged();
+            if (_isWhite)
+            {
+                transform.rotation = Quaternion.AngleAxis(180, Vector3.forward);
+                //_upRenderer.sharedMaterial.color = Color.white;
+                //_downRenderer.sharedMaterial.color = Color.black;
+            }
+            else
+            {
+                transform.rotation = Quaternion.identity;
+                //_upRenderer.sharedMaterial.color = Color.black;
+                //_downRenderer.sharedMaterial.color = Color.white;
+            }
         }
     }
 
@@ -25,22 +37,22 @@ public class Stone : MonoBehaviour
     /// <summary>
     /// èÛë‘Ç…ÇÊÇ¡ÇƒîíçïïœÇ¶ÇÈ
     /// </summary>
-    private void OnColorChanged()
-    {
-        if (_isWhite)
-        {
-            transform.rotation = Quaternion.AngleAxis(180, Vector3.forward);
-            //_upRenderer.sharedMaterial.color = Color.white;
-            //_downRenderer.sharedMaterial.color = Color.black;
-        }
-        else
-        {
-            transform.rotation = Quaternion.identity;
-            //_upRenderer.sharedMaterial.color = Color.black;
-            //_downRenderer.sharedMaterial.color = Color.white;
-        }
+    //private void OnColorChanged()
+    //{
+    //    if (_isWhite)
+    //    {
+    //        transform.rotation = Quaternion.AngleAxis(180, Vector3.forward);
+    //        //_upRenderer.sharedMaterial.color = Color.white;
+    //        //_downRenderer.sharedMaterial.color = Color.black;
+    //    }
+    //    else
+    //    {
+    //        transform.rotation = Quaternion.identity;
+    //        //_upRenderer.sharedMaterial.color = Color.black;
+    //        //_downRenderer.sharedMaterial.color = Color.white;
+    //    }
 
-    }
+    //}
 
     //public enum ColorState
     //{
