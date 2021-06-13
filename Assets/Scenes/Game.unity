@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.44824904, g: 0.49827605, b: 0.57558316, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -97,8 +97,8 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 0}
-  m_LightingSettings: {fileID: 0}
+  m_LightingDataAsset: {fileID: 112000000, guid: 7f7dc9a0c877c794284e20c61f23e035, type: 2}
+  m_LightingSettings: {fileID: 4890085278179872738, guid: 1f46fef46fb41d54a8326a20811ae0a0, type: 2}
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -340,7 +340,7 @@ Light:
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 2
+    m_Type: 0
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -391,13 +391,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 705507993}
-  m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
+  m_LocalRotation: {x: 0.35355338, y: -0.35355338, z: 0.1464466, w: 0.8535535}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+  m_LocalEulerAnglesHint: {x: 45, y: -45, z: 0}
 --- !u!1 &729527490
 GameObject:
   m_ObjectHideFlags: 0
@@ -1375,14 +1375,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39a260131824a794ab3767245d30d08f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _blackAuto: 1
+  _blackAuto: 0
   _whiteAuto: 1
   _isPlaying: 0
   _isWhiteTurn: 0
   _boardCubePrefab: {fileID: 9078797176833337068, guid: be1adb339cbf95c4ba775d56976a4349, type: 3}
   _stonePrefab: {fileID: 2597888222990527014, guid: ecfa541e0027d6b4c9b90c4b2fe1afdb, type: 3}
   _stoneOffset: 0.2
-  _delayTime: 0.1
+  _delayTime: 0.5
   _turnText: {fileID: 1786262492}
   _blackText: {fileID: 700176810}
   _whiteText: {fileID: 1061259624}

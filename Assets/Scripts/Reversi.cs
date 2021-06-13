@@ -26,6 +26,7 @@ public class Reversi : MonoBehaviour
     int _columns = 8;
     BoardCube[,] _boardCubes;
     float _delayCount = 0;
+    int _passCount = 0;
 
     void Start()
     {
@@ -50,12 +51,15 @@ public class Reversi : MonoBehaviour
         PlaceStone(_boardCubes[4, 4]);
         _boardCubes[4, 4]._placedStone.IsWhite = true;
 
-        TurnUpdate(_isWhiteTurn);
+        _isPlaying = true;
+        _gameStatePanel.gameObject.SetActive(false);
+        TurnUpdate(false);
         BoardUpdate();
     }
 
     void Update()
     {
+        //オートでの動き
         if (!_isPlaying) return;
 
         if (_blackAuto && !_isWhiteTurn || _whiteAuto && _isWhiteTurn)
@@ -76,8 +80,6 @@ public class Reversi : MonoBehaviour
                 PlaceStone(canBePlacedBoard[Random.Range(0, canBePlacedBoard.Count)]);
             }
         }
-        
-        
     }
 
     /// <summary>
@@ -113,7 +115,6 @@ public class Reversi : MonoBehaviour
             turnOver.IsWhite = _isWhiteTurn ? true : false;
         }
 
-        //ターン切り替え
         TurnUpdate(!_isWhiteTurn);
         BoardUpdate();
     }
@@ -134,6 +135,7 @@ public class Reversi : MonoBehaviour
     /// </summary>
     void BoardUpdate()
     {
+        //コマ数カウントを更新
         int black = 0;
         int white = 0;
         foreach (var bc in _boardCubes)
@@ -153,44 +155,80 @@ public class Reversi : MonoBehaviour
         _blackText.text = $"黒 ：{black}";
         _whiteText.text = $"白 ：{white}";
 
-        if (black + white != _rows * _columns)////////////////////置けないときパス、両者置けないとき終了
+        //置けるマスを更新
+        int canCount = 0;
+        foreach (var bc in _boardCubes)
         {
-            _isPlaying = true;
-            _gameStatePanel.gameObject.SetActive(false);
-
-            foreach (var bc in _boardCubes)
+            //bc.CanBePlaced = bc._placedStone == null && GetTurnOverWhenPlaced(bc).Length > 0 ? true : false;
+            if (bc._placedStone == null && GetTurnOverWhenPlaced(bc).Length > 0)
             {
-                bc.CanBePlaced = bc._placedStone == null && GetTurnOverWhenPlaced(bc).Length > 0 ? true : false;
-                //if (bc._placedStone == null && GetTurnOverWhenPlaced(bc).Length > 0)
-                //{
-                //    bc.CanBePlaced = true;
-                //}
-                //else
-                //{
-                //    bc.CanBePlaced = false;
-                //}
+                bc.CanBePlaced = true;
+                canCount++;
+            }
+            else
+            {
+                bc.CanBePlaced = false;
+            }
+        }
+        //パスが2連続で起こるとゲーム終了
+        if (canCount == 0)
+        {
+            if (_passCount == 0)
+            {
+                Debug.Log(0);
+                _passCount++;
+                TurnUpdate(!_isWhiteTurn);
+                BoardUpdate();
+            }
+            else
+            {
+                _isPlaying = false;
+                _gameStatePanel.gameObject.SetActive(true);
+                if (black == white)
+                {
+                    _gameStateText.text = "引き分け";
+                    _gameStateText.color = Color.gray;
+                }
+                else if (black > white)
+                {
+                    _gameStateText.text = "黒の勝ち";
+                    _gameStateText.color = Color.black;
+                }
+                else
+                {
+                    _gameStateText.text = "白の勝ち";
+                    _gameStateText.color = Color.white;
+                }
             }
         }
         else
         {
-            _isPlaying = false;
-            _gameStatePanel.gameObject.SetActive(true);
-            if (black == white)
-            {
-                _gameStateText.text = "引き分け";
-                _gameStateText.color = Color.gray;
-            }
-            else if (black > white)
-            {
-                _gameStateText.text = "黒の勝ち";
-                _gameStateText.color = Color.black;
-            }
-            else
-            {
-                _gameStateText.text = "白の勝ち";
-                _gameStateText.color = Color.white;
-            }
+            _passCount = 0;
         }
+        //if (black + white != _rows * _columns)////////////////////置けないときパス、両者置けないとき終了
+        //{
+            
+        //}
+        //else
+        //{
+        //    _isPlaying = false; 
+        //    _gameStatePanel.gameObject.SetActive(true);
+        //    if (black == white)
+        //    {
+        //        _gameStateText.text = "引き分け";
+        //        _gameStateText.color = Color.gray;
+        //    }
+        //    else if (black > white)
+        //    {
+        //        _gameStateText.text = "黒の勝ち";
+        //        _gameStateText.color = Color.black;
+        //    }
+        //    else
+        //    {
+        //        _gameStateText.text = "白の勝ち";
+        //        _gameStateText.color = Color.white;
+        //    }
+        //}
     }
 
 
@@ -203,6 +241,7 @@ public class Reversi : MonoBehaviour
     /// <returns></returns>
     Stone[] GetTurnOverWhenPlaced(BoardCube boardCube)
     {
+        //8方向を確認する
         List<Stone> turnOverStones = new List<Stone>();
         for (int i = -1; i <= 1; i++)
         {
@@ -215,7 +254,7 @@ public class Reversi : MonoBehaviour
                     if (0 > dirR || dirR >= _rows || 0 > dirC || dirC >= _columns) break;
                     if (_boardCubes[dirR, dirC] == _boardCubes[boardCube._row, boardCube._column]) break;
                     if (!_boardCubes[dirR, dirC]._placedStone) break;
-
+                    //線上に同色コマがあれば戻るように異色コマを取得
                     if (_boardCubes[dirR, dirC]._placedStone.IsWhite == _isWhiteTurn)
                     {
                         List<Stone> lineTurnOverStones = new List<Stone>();
