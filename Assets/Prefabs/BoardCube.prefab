@@ -132,7 +132,7 @@ MonoBehaviour:
         m_Calls:
         - m_Target: {fileID: 9078797176833337068}
           m_TargetAssemblyTypeName: BoardCube, Assembly-CSharp
-          m_MethodName: Select
+          m_MethodName: SelectBoard
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}

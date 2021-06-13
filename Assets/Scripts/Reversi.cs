@@ -7,15 +7,20 @@ public class Reversi : MonoBehaviour
 {
     [SerializeField] bool _blackAuto = false;
     [SerializeField] bool _whiteAuto = true;
+    [SerializeField] float _delayTime = 0.2f;
 
     [SerializeField] bool _isPlaying = false;
     [SerializeField] bool _isWhiteTurn = false;
 
     [SerializeField] BoardCube _boardCubePrefab = null;
-    [SerializeField] Stone _stonePrefab = null;
+    [SerializeField] Stone _selectStone = null;
+    [SerializeField] Stone _normalStonePrefab = null;
+    [SerializeField] SelectStoneController[] _selectStoneControllers = null;
+
+    //[SerializeField] Stone[] _specialStonePrefabs = null;
+    //[SerializeField] int[] _specialStoneCount = null;
 
     [SerializeField] float _stoneOffset = 0.5f;
-    [SerializeField] float _delayTime = 0.2f;
 
     [SerializeField] Text _turnText = null;
     [SerializeField] Text _blackText = null;
@@ -27,9 +32,11 @@ public class Reversi : MonoBehaviour
     BoardCube[,] _boardCubes;
     float _delayCount = 0;
     int _passCount = 0;
+    SelectStoneController _selectStoneController = null;
 
     void Start()
     {
+        _selectStone = _normalStonePrefab;
         _boardCubes = new BoardCube[_rows, _columns];
         for (int r = 0; r < _rows; r++)
         {
@@ -53,6 +60,10 @@ public class Reversi : MonoBehaviour
 
         _isPlaying = true;
         _gameStatePanel.gameObject.SetActive(false);
+        foreach (var ss in _selectStoneControllers)
+        {
+            ss.Setup();
+        }
         TurnUpdate(false);
         BoardUpdate();
     }
@@ -121,7 +132,7 @@ public class Reversi : MonoBehaviour
 
     void oku(BoardCube boardCube, bool isWhite)
     {
-        Stone stone = Instantiate(_stonePrefab, boardCube.transform);
+        Stone stone = Instantiate(_selectStone, boardCube.transform);
         //stone.transform.SetParent(boardCube.transform);
         Vector3 offset = new Vector3(0, _stoneOffset, 0);
         stone.transform.position = boardCube.transform.position + offset;
@@ -137,6 +148,19 @@ public class Reversi : MonoBehaviour
         //    //stone.transform.rotation = Quaternion.Euler(0, 0, 180);
         //}
         boardCube._placedStone = stone;
+
+        if (_selectStone != _normalStonePrefab)
+        {
+            _selectStoneController.Count--;
+            SetStone(_selectStone, _selectStoneController);
+        }
+        //if (_selectStone != _normalStonePrefab)
+        //{
+        //    _selectStoneController.Count--;
+        //    _selectStone = _normalStonePrefab;
+        //    _selectStoneController.IsSelected = false;
+        //    _selectStoneController = null;
+        //}
 
         if (_isPlaying)
         {
@@ -169,6 +193,7 @@ public class Reversi : MonoBehaviour
     /// </summary>
     void BoardUpdate()
     {
+
         //コマ数カウントを更新
         int black = 0;
         int white = 0;
@@ -241,30 +266,28 @@ public class Reversi : MonoBehaviour
         {
             _passCount = 0;
         }
-        //if (black + white != _rows * _columns)////////////////////置けないときパス、両者置けないとき終了
+    }
+
+    public void SetStone(Stone stone, SelectStoneController controller)
+    {
+        if (_selectStone != stone)
+        {
+            _selectStone = stone;
+            _selectStoneController = controller;
+            _selectStoneController.IsSelected = true;
+        }
+        else
+        {
+            _selectStone = _normalStonePrefab;
+            _selectStoneController.IsSelected = false;
+            _selectStoneController = null;
+        }
+        //_selectStone = _selectStone != stone ? stone : _normalStonePrefab;
+        //if (_selectStone != stone)
         //{
-            
+        //    _selectStone = stone;
         //}
-        //else
-        //{
-        //    _isPlaying = false; 
-        //    _gameStatePanel.gameObject.SetActive(true);
-        //    if (black == white)
-        //    {
-        //        _gameStateText.text = "引き分け";
-        //        _gameStateText.color = Color.gray;
-        //    }
-        //    else if (black > white)
-        //    {
-        //        _gameStateText.text = "黒の勝ち";
-        //        _gameStateText.color = Color.black;
-        //    }
-        //    else
-        //    {
-        //        _gameStateText.text = "白の勝ち";
-        //        _gameStateText.color = Color.white;
-        //    }
-        //}
+
     }
 
     /// <summary>

@@ -56,7 +56,7 @@ public class BoardCube : MonoBehaviour
     /// <summary>
     /// ƒ}ƒX‚ð‘I‘ð
     /// </summary>
-    public void Select()
+    public void SelectBoard()
     {
         Reversi reversi = FindObjectOfType<Reversi>();
         if (_canBePlaced && !reversi.GetNowAuto())// && !_placedStone)
