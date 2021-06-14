@@ -1,6 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+// Photon 用の名前空間を参照する
+using ExitGames.Client.Photon;
+using Photon.Pun;
+using Photon.Realtime;
 
 public class BoardCube : MonoBehaviour
 {
@@ -31,7 +35,33 @@ public class BoardCube : MonoBehaviour
         Reversi reversi = FindObjectOfType<Reversi>();
         if (_canBePlaced && reversi.GetControlNow())
         {
-            reversi.PlaceStone(this);
+            if (!reversi.Network)
+            {
+                reversi.PlaceStone(this);
+            }
+            else
+            {
+                RaisePlaceStone(this);
+            }
         }
+    }
+
+    /// <summary>
+    /// PlaceStoneイベントを起こす
+    /// </summary>
+    public void RaisePlaceStone(BoardCube boardCube)
+    {
+        //イベントとして送るものを作る
+        byte eventCode = (int)NetworkGameManager.EventCode.PlaceStone;
+
+        object[] parameters = new object[] { boardCube.Row, boardCube.Column };
+
+        RaiseEventOptions raiseEventOptions = new RaiseEventOptions();
+        raiseEventOptions.Receivers = ReceiverGroup.All;
+
+        SendOptions sendOptions = new SendOptions(); // オプションだが、特に何も指定しない
+
+        // イベントを起こす
+        PhotonNetwork.RaiseEvent(eventCode, parameters, raiseEventOptions, sendOptions);
     }
 }

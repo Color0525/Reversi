@@ -3,9 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
+// Photon 用の名前空間を参照する
+using ExitGames.Client.Photon;
+using Photon.Pun;
+using Photon.Realtime;
 
-public class Reversi : MonoBehaviour
+public class Reversi : MonoBehaviourPunCallbacks, IOnEventCallback
 {
+    [SerializeField] NetworkGameManager _network = null;
     [SerializeField] bool _blackControl = false;
     [SerializeField] bool _whiteControl = true;
     [SerializeField] float _autoSelectRate = 0.1f;
@@ -38,6 +43,7 @@ public class Reversi : MonoBehaviour
     bool _endTurn = false;
     int _passCount = 0;
 
+    public bool Network { get { return _network; } }
     public bool IsBlackTurn { get { return _isBlackTurn; } }
     public bool EndAnime { get { return _endAnime; } set { _endAnime = value; } }
 
@@ -65,20 +71,15 @@ public class Reversi : MonoBehaviour
         Placement(_boardCubes[3, 4], false);
         Placement(_boardCubes[4, 3], false);
         Placement(_boardCubes[4, 4], true);
-        //ゲーム開始
-        _isPlaying = true;
+
         _gameStatePanel.gameObject.SetActive(false);
-        bool myColorIsBlack = Random.Range(0, 2) == 0;
-        _blackControl = myColorIsBlack;
-        _whiteControl = !myColorIsBlack;
-        _yourBlack.gameObject.SetActive(myColorIsBlack);
-        _yourWhite.gameObject.SetActive(!myColorIsBlack);
-        foreach (var ss in _selectStoneControllers)
+        _yourBlack.gameObject.SetActive(false);
+        _yourWhite.gameObject.SetActive(false);
+
+        if (!_network)
         {
-            ss.Initialize();
+            StartGame(Random.Range(0, 2) == 0);
         }
-        TurnUpdate(true);
-        BoardUpdate();
     }
 
     void Update()
@@ -96,6 +97,7 @@ public class Reversi : MonoBehaviour
         }
         else
         {
+            if (_network) return;
             //オート時の動き
             if (!_blackControl && _isBlackTurn || !_whiteControl && !_isBlackTurn)
             {
@@ -123,6 +125,55 @@ public class Reversi : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// イベントが Raise されると呼ばれる
+    /// </summary>
+    /// <param name="e">イベントデータ</param>
+    void IOnEventCallback.OnEvent(EventData e)
+    {
+        if ((int)e.Code < 200)  // 200 以上はシステムで使われているので処理しない
+        {
+            if ((int)e.Code == (int)NetworkGameManager.EventCode.StartGame)
+            {
+                if (PhotonNetwork.LocalPlayer.ActorNumber == 2)//Random.Range(1, 3))
+                {
+                    StartGame(true);
+                }
+                else
+                {
+                    StartGame(false);
+                }
+            }
+            if ((int)e.Code == (int)NetworkGameManager.EventCode.PlaceStone)
+            {
+                PlaceStone(_boardCubes[(int)e.Parameters[0], (int)e.Parameters[1]]);
+            }
+
+        }
+    }
+
+    /// <summary>
+    /// ゲーム開始
+    /// </summary>
+    /// <param name="myColorIsBlack"></param>
+    void StartGame(bool myColorIsBlack)
+    {
+        _isPlaying = true;
+
+        _blackControl = myColorIsBlack;
+        _whiteControl = !myColorIsBlack;
+        _yourBlack.gameObject.SetActive(myColorIsBlack);
+        _yourWhite.gameObject.SetActive(!myColorIsBlack);
+
+        foreach (var ss in _selectStoneControllers)
+        {
+            ss.Initialize();
+        }
+
+        TurnUpdate(true);
+        BoardUpdate();
+    }
+   
     /// <summary>
     /// 再度ゲームを行う
     /// </summary>
