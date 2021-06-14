@@ -97,7 +97,10 @@ public class SelectStoneController : MonoBehaviour
     /// </summary>
     public void PopupStone()
     {
-        _selectStoneImage.rectTransform.localScale = new Vector3(1.1f, 1.1f, 1.1f);
+        if ((_reversi.IsBlackTurn ? _blackCount : _whiteCount) > 0 && _reversi.GetControlNow())
+        {
+            _selectStoneImage.rectTransform.localScale = new Vector3(1.1f, 1.1f, 1.1f);
+        }
     }
 
     /// <summary>
@@ -113,10 +116,9 @@ public class SelectStoneController : MonoBehaviour
     /// </summary>
     public void SelectStone()
     {
-        Reversi reversi = FindObjectOfType<Reversi>();
-        if ((reversi.IsBlackTurn ? _blackCount : _whiteCount) > 0)
+        if ((_reversi.IsBlackTurn ? _blackCount : _whiteCount) > 0 && _reversi.GetControlNow())
         {
-            reversi.SetSelectStone(_selectStonePrefab, this);
+            _reversi.SetSelectStone(_selectStonePrefab, this);
         }
     }
 }
