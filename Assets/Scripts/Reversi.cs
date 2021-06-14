@@ -104,9 +104,10 @@ public class Reversi : MonoBehaviour
                 {
                     _delayCount = 0;
                     //確率で特殊石を使用
-                    if (Random.value < _autoSelectRate)
+                    SelectStoneController ssc = _selectStoneControllers[Random.Range(0, _selectStoneControllers.Length)];
+                    if (Random.value < _autoSelectRate && (IsBlackTurn ? ssc.BlackCount : ssc.WhiteCount) > 0)
                     {
-                        _selectStoneControllers[Random.Range(0, _selectStoneControllers.Length)].SelectStone();
+                        SetSelectStone(ssc.SelectStonePrefab, ssc);
                     }
                     //ランダムな置けるマスに置く
                     List<BoardCube> canBePlacedBoard = new List<BoardCube>();
@@ -162,7 +163,15 @@ public class Reversi : MonoBehaviour
         //特殊石を使用していたなら数を減らし、普通石に戻す
         if (_selectStone != _normalStonePrefab)
         {
-            _selectStoneController.Count(-1);
+            if (IsBlackTurn)
+            {
+                _selectStoneController.BlackCount--;
+            }
+            else
+            {
+                _selectStoneController.WhiteCount--;
+            }
+            _selectStoneController.TextUpdate();
             SetSelectStone(_selectStone, _selectStoneController);
         }
         //置く動き

@@ -17,11 +17,13 @@ public class SelectStoneController : MonoBehaviour
     Quaternion _selectStoneObjectInitialRot;
     Reversi _reversi;
 
+    public int BlackCount { get { return _blackCount; } set{ _blackCount = value; } }
+    public int WhiteCount { get { return _whiteCount; } set{ _whiteCount = value; } }
+    public Stone SelectStonePrefab { get { return _selectStonePrefab; } }
     public bool IsSelected { get { return _isSelected; } set{ _isSelected = value; } }
 
     void Awake()
     {
-        //
         _selectStoneObjectInitialRot = _backImage.rectTransform.localRotation;
         _reversi = FindObjectOfType<Reversi>();
     }
@@ -56,24 +58,6 @@ public class SelectStoneController : MonoBehaviour
     }
 
     /// <summary>
-    /// カウントの増減
-    /// </summary>
-    /// <param name="value"></param>
-    public void Count(int value)
-    {
-
-        if (_reversi.IsBlackTurn)
-        {
-            _blackCount += value;
-        }
-        else
-        {
-            _whiteCount += value;
-        }
-        TextUpdate();
-    }
-
-    /// <summary>
     /// ターンを更新
     /// </summary>
     public void TurnUpdate()
@@ -86,7 +70,7 @@ public class SelectStoneController : MonoBehaviour
     /// <summary>
     /// 残り数を更新
     /// </summary>
-    void TextUpdate()
+    public void TextUpdate()
     {
         _countText.text = _reversi.GetControlNow() ? 
             _reversi.IsBlackTurn ? _blackCount.ToString() : _whiteCount.ToString() : 

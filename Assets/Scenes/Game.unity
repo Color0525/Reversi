@@ -1947,7 +1947,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39a260131824a794ab3767245d30d08f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _blackControl: 1
+  _blackControl: 0
   _whiteControl: 0
   _autoSelectRate: 0.2
   _delayTime: 0.5
