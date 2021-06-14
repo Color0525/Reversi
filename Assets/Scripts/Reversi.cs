@@ -19,7 +19,8 @@ public class Reversi : MonoBehaviour
     [SerializeField] float _stoneOffset = 0.5f;
     [SerializeField] SelectStoneController[] _selectStoneControllers = null;
     [SerializeField] RectTransform _turnBackGround = null;
-    [SerializeField] Vector3 _turnBackGroundOffset = new Vector3(0, 1200, 0);
+    [SerializeField] Vector3 _turnBackGroundStartOffset = new Vector3(0, 100, 0);
+    [SerializeField] Vector3 _turnBackGroundEndOffset = new Vector3(0, 1100, 0);
     [SerializeField] float _turnBackGroundTime = 0.5f;
     [SerializeField] Text _blackTotal = null;
     [SerializeField] Text _whiteTotal = null;
@@ -204,7 +205,7 @@ public class Reversi : MonoBehaviour
     {
         _isBlackTurn = nextTurnIsBlack;//逆色のターンにする
         //ターン切り替え用背景を動かす
-        _turnBackGround.DOAnchorPos3D(_isBlackTurn ? Vector3.zero : _turnBackGroundOffset, _turnBackGroundTime)
+        _turnBackGround.DOAnchorPos3D(_isBlackTurn ? _turnBackGroundStartOffset : _turnBackGroundEndOffset, _turnBackGroundTime)
             .SetEase(Ease.OutQuart);
         //特殊石のターンを更新
         foreach (var ss in _selectStoneControllers)
