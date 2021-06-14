@@ -6,87 +6,84 @@ using DG.Tweening;
 
 public class Reversi : MonoBehaviour
 {
-    [SerializeField] bool _autoBlack = false;
-    [SerializeField] bool _autoWhite = true;
+    [SerializeField] bool _blackControl = false;
+    [SerializeField] bool _whiteControl = true;
     [SerializeField] float _autoSelectRate = 0.1f;
-    [SerializeField] bool _noAnime = false;
     [SerializeField] float _delayTime = 0.2f;
-
+    [SerializeField] bool _noAnime = false;
     [SerializeField] bool _isPlaying = false;
-    [SerializeField] bool _isWhiteTurn = false;
-    public bool IsWhiteTurn { get { return _isWhiteTurn; } }
-
-    [SerializeField] BoardCube _boardCubePrefab = null;
+    [SerializeField] bool _isBlackTurn = false;
     [SerializeField] Stone _selectStone = null;
+    [SerializeField] BoardCube _boardCubePrefab = null;
     [SerializeField] Stone _normalStonePrefab = null;
-    [SerializeField] SelectStoneController[] _selectStoneControllers = null;
-
-    //[SerializeField] Stone[] _specialStonePrefabs = null;
-    //[SerializeField] int[] _specialStoneCount = null;
-
     [SerializeField] float _stoneOffset = 0.5f;
-
+    [SerializeField] SelectStoneController[] _selectStoneControllers = null;
     [SerializeField] RectTransform _turnBackGround = null;
     [SerializeField] Vector3 _turnBackGroundOffset = new Vector3(0, 1200, 0);
     [SerializeField] float _turnBackGroundTime = 0.5f;
-    //[SerializeField] Text _turnText = null;
     [SerializeField] Text _blackTotal = null;
     [SerializeField] Text _whiteTotal = null;
-    [SerializeField] Text _YourBlack = null;
-    [SerializeField] Text _YourWhite = null;
+    [SerializeField] Text _yourBlack = null;
+    [SerializeField] Text _yourWhite = null;
     [SerializeField] Image _gameStatePanel = null;
     [SerializeField] Text _gameStateText = null;
 
+    float _delayCount = 0;
+    bool _endAnime = false;
     int _rows = 8;
     int _columns = 8;
     BoardCube[,] _boardCubes;
-    float _delayCount = 0;
-    int _passCount = 0;
     SelectStoneController _selectStoneController = null;
     bool _endTurn = false;
-    bool _endAnime = false;
+    int _passCount = 0;
+
+    public bool IsBlackTurn { get { return _isBlackTurn; } }
     public bool EndAnime { get { return _endAnime; } set { _endAnime = value; } }
+
+    void Awake()
+    {
+        _boardCubes = new BoardCube[_rows, _columns];    
+    }
 
     void Start()
     {
-        _boardCubes = new BoardCube[_rows, _columns];
+        //ボードを生成、配置
         for (int r = 0; r < _rows; r++)
         {
             for (int c = 0; c < _columns; c++)
             {
                 _boardCubes[r, c] = Instantiate(_boardCubePrefab);
                 _boardCubes[r, c].transform.position = new Vector3(c - 3.5f, 0, -r + 3.5f);
-                _boardCubes[r, c]._row = r;
-                _boardCubes[r, c]._column = c;
+                _boardCubes[r, c].Row = r;
+                _boardCubes[r, c].Column = c;
             }
         }
-
+        //初期石を置く
         _selectStone = _normalStonePrefab;
-        oku(_boardCubes[3, 3], true);
-        oku(_boardCubes[3, 4], false);
-        oku(_boardCubes[4, 3], false);
-        oku(_boardCubes[4, 4], true);
-        //_boardCubes[3, 3]._placedStone.IsWhite = true;
-        //_boardCubes[3, 3]._placedStone.transform.rotation = Quaternion.Euler(0, 0, 180);
-        //_boardCubes[4, 4]._placedStone.IsWhite = true;
-        //_boardCubes[4, 4]._placedStone.transform.rotation = Quaternion.Euler(0, 0, 180);
-
+        Placement(_boardCubes[3, 3], true);
+        Placement(_boardCubes[3, 4], false);
+        Placement(_boardCubes[4, 3], false);
+        Placement(_boardCubes[4, 4], true);
+        //ゲーム開始
         _isPlaying = true;
         _gameStatePanel.gameObject.SetActive(false);
-        _YourBlack.gameObject.SetActive(!_autoBlack);
-        _YourWhite.gameObject.SetActive(!_autoWhite);
+        bool myColorIsBlack = Random.Range(0, 2) == 0;
+        _blackControl = myColorIsBlack;
+        _whiteControl = !myColorIsBlack;
+        _yourBlack.gameObject.SetActive(myColorIsBlack);
+        _yourWhite.gameObject.SetActive(!myColorIsBlack);
         foreach (var ss in _selectStoneControllers)
         {
-            ss.Setup();
+            ss.Initialize();
         }
-        TurnUpdate(false);
+        TurnUpdate(true);
         BoardUpdate();
     }
 
     void Update()
     {
         if (!_isPlaying) return;
-
+        //ターン終了していたら次のターンへ
         if (_endTurn)
         {
             if (_endAnime || _noAnime)
@@ -98,28 +95,19 @@ public class Reversi : MonoBehaviour
         }
         else
         {
-            //オートでの動き
-            if (_autoBlack && !_isWhiteTurn || _autoWhite && _isWhiteTurn)
+            //オート時の動き
+            if (!_blackControl && _isBlackTurn || !_whiteControl && !_isBlackTurn)
             {
                 _delayCount += Time.deltaTime;
                 if (_delayCount > _delayTime)
                 {
                     _delayCount = 0;
-
+                    //確率で特殊石を使用
                     if (Random.value < _autoSelectRate)
                     {
-                        //SelectStoneController ranStone = _selectStoneControllers[Random.Range(0, _selectStoneControllers.Length)];
                         _selectStoneControllers[Random.Range(0, _selectStoneControllers.Length)].SelectStone();
-                        //if (!_isWhiteTurn)
-                        //{
-                        //    if (ranStone.BlackCount > 0)//(_isWhiteTurn ? BlackCount : WhiteCount) > 0)
-                        //    {
-                        //        SetSelectStone(ranStone._selectStonePrefab, this);
-                        //    }
-                        //}
-
                     }
-
+                    //ランダムな置けるマスに置く
                     List<BoardCube> canBePlacedBoard = new List<BoardCube>();
                     foreach (var bc in _boardCubes)
                     {
@@ -132,10 +120,19 @@ public class Reversi : MonoBehaviour
                 }
             }
         }
-
-        
     }
 
+    /// <summary>
+    /// 再度ゲームを行う
+    /// </summary>
+    public void Retry()
+    {
+        foreach (var bc in _boardCubes)
+        {
+            Destroy(bc.gameObject);
+        }
+        Start();
+    }
 
     /// <summary>
     /// 石を置く
@@ -143,57 +140,47 @@ public class Reversi : MonoBehaviour
     /// <param name="boardCube"></param>
     public void PlaceStone(BoardCube boardCube)
     {
-        oku(boardCube, _isWhiteTurn);
-        kaesu(boardCube);
-
+        Placement(boardCube, _isBlackTurn);
+        TurnOver(boardCube);
         _endTurn = true;
-        //TurnUpdate(!_isWhiteTurn);
-        //BoardUpdate();
     }
 
-    void oku(BoardCube boardCube, bool isWhite)
+    /// <summary>
+    /// 石を配置
+    /// </summary>
+    /// <param name="boardCube"></param>
+    /// <param name="isBlack"></param>
+    void Placement(BoardCube boardCube, bool isBlack)
     {
+        //石を生成、配置
         Stone stone = Instantiate(_selectStone, boardCube.transform);
-        //stone.transform.SetParent(boardCube.transform);
         Vector3 offset = new Vector3(0, _stoneOffset, 0);
         stone.transform.position = boardCube.transform.position + offset;
-        stone.IsWhite = !isWhite ? false : true;
-        //if (!isWhite)
-        //{
-        //    stone.IsWhite = false;
-        //    //stone.transform.rotation = Quaternion.identity;
-        //}
-        //else
-        //{
-        //    stone.IsWhite = true;
-        //    //stone.transform.rotation = Quaternion.Euler(0, 0, 180);
-        //}
-        boardCube._placedStone = stone;
-
+        stone.IsBlack = isBlack ? true : false;
+        boardCube.PlacedStone = stone;
+        //特殊石を使用していたなら数を減らし、普通石に戻す
         if (_selectStone != _normalStonePrefab)
         {
             _selectStoneController.Count(-1);
             SetSelectStone(_selectStone, _selectStoneController);
         }
-        //if (_selectStone != _normalStonePrefab)
-        //{
-        //    _selectStoneController.Count--;
-        //    _selectStone = _normalStonePrefab;
-        //    _selectStoneController.IsSelected = false;
-        //    _selectStoneController = null;
-        //}
-
+        //置く動き
         if (_isPlaying && !_noAnime)
         {
             stone.PlaceMovement();
         }
     }
 
-    void kaesu(BoardCube boardCube)
+    /// <summary>
+    /// 石をひっくり返す
+    /// </summary>
+    /// <param name="boardCube"></param>
+    void TurnOver(BoardCube boardCube)
     {
         foreach (var stone in GetTurnOverWhenPlaced(boardCube))
         {
-            stone.IsWhite = _isWhiteTurn ? true : false;
+            stone.IsBlack = _isBlackTurn ? true : false;
+            //ひっくり返す動き
             if (!_noAnime)
             {
                 stone.TurnOverMovement();
@@ -201,28 +188,25 @@ public class Reversi : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 次のターンへ
+    /// </summary>
     void NextTurn()
     {
-        TurnUpdate(!_isWhiteTurn);
+        TurnUpdate(!_isBlackTurn);
         BoardUpdate();
     }
 
     /// <summary>
     /// ターンを更新
     /// </summary>
-    void TurnUpdate(bool nextTurnIsWhite)
+    void TurnUpdate(bool nextTurnIsBlack)
     {
-        _isWhiteTurn = nextTurnIsWhite;
-
-        //_turnText.text = _isWhiteTurn ? "白の番" : "黒の番";
-        //_turnText.color = _isWhiteTurn ? Color.white : Color.black;
-        //_turnBackGround.color = _isWhiteTurn ? Color.white : Color.black;
-        if (!_noAnime)
-        {
-            _turnBackGround.DOAnchorPos3D(!_isWhiteTurn ? Vector3.zero : _turnBackGroundOffset, _turnBackGroundTime)
-                .SetEase(Ease.OutQuart);
-        }
-
+        _isBlackTurn = nextTurnIsBlack;//逆色のターンにする
+        //ターン切り替え用背景を動かす
+        _turnBackGround.DOAnchorPos3D(_isBlackTurn ? Vector3.zero : _turnBackGroundOffset, _turnBackGroundTime)
+            .SetEase(Ease.OutQuart);
+        //特殊石のターンを更新
         foreach (var ss in _selectStoneControllers)
         {
             ss.TurnUpdate();
@@ -234,15 +218,14 @@ public class Reversi : MonoBehaviour
     /// </summary>
     void BoardUpdate()
     {
-
-        //コマ数カウントを更新
+        //それぞれの合計数を更新
         int black = 0;
         int white = 0;
         foreach (var bc in _boardCubes)
         {
-            if (bc._placedStone)
+            if (bc.PlacedStone)
             {
-                if (!bc._placedStone.IsWhite)
+                if (bc.PlacedStone.IsBlack)
                 {
                     black++;
                 }
@@ -252,15 +235,13 @@ public class Reversi : MonoBehaviour
                 }
             }
         }
-        _blackTotal.text = black.ToString();// $"黒 ：{black}";
-        _whiteTotal.text = white.ToString();// $"白 ：{white}";
-
+        _blackTotal.text = black.ToString();
+        _whiteTotal.text = white.ToString();
         //置けるマスを更新
         int canCount = 0;
         foreach (var bc in _boardCubes)
         {
-            //bc.CanBePlaced = bc._placedStone == null && GetTurnOverWhenPlaced(bc).Length > 0 ? true : false;
-            if (bc._placedStone == null && GetTurnOverWhenPlaced(bc).Length > 0)
+            if (bc.PlacedStone == null && GetTurnOverWhenPlaced(bc).Length > 0)
             {
                 bc.CanBePlaced = true;
                 canCount++;
@@ -308,6 +289,11 @@ public class Reversi : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 特殊石を選択状態に、もしくは解除する
+    /// </summary>
+    /// <param name="stone"></param>
+    /// <param name="controller"></param>
     public void SetSelectStone(Stone stone, SelectStoneController controller)
     {
         if (_selectStone != stone)
@@ -322,29 +308,10 @@ public class Reversi : MonoBehaviour
             _selectStoneController.IsSelected = false;
             _selectStoneController = null;
         }
-        //_selectStone = _selectStone != stone ? stone : _normalStonePrefab;
-        //if (_selectStone != stone)
-        //{
-        //    _selectStone = stone;
-        //}
-
     }
 
     /// <summary>
-    /// リトライ
-    /// </summary>
-    public void Retry()
-    {
-        foreach (var bc in _boardCubes)
-        {
-            Destroy(bc.gameObject);
-        }
-        Start();
-    }
-
-
-    /// <summary>
-    /// 指定マスに置かれたときに裏返る石を返す
+    /// 指定マスに置かれたときに裏返る石
     /// </summary>
     /// <param name="boardCube"></param>
     /// <returns></returns>
@@ -356,22 +323,22 @@ public class Reversi : MonoBehaviour
         {
             for (int k = -1; k <= 1; k++)
             {
-                int dirR = boardCube._row + i;
-                int dirC = boardCube._column + k;
+                int dirR = boardCube.Row + i;
+                int dirC = boardCube.Column + k;
                 while (true)
                 {
                     if (0 > dirR || dirR >= _rows || 0 > dirC || dirC >= _columns) break;
-                    if (_boardCubes[dirR, dirC] == _boardCubes[boardCube._row, boardCube._column]) break;
-                    if (!_boardCubes[dirR, dirC]._placedStone) break;
-                    //線上に同色コマがあれば戻るように異色コマを取得
-                    if (_boardCubes[dirR, dirC]._placedStone.IsWhite == _isWhiteTurn)
+                    if (_boardCubes[dirR, dirC] == _boardCubes[boardCube.Row, boardCube.Column]) break;
+                    if (!_boardCubes[dirR, dirC].PlacedStone) break;
+                    //線上に同色石があれば戻るようにげ逆色石を取得
+                    if (_boardCubes[dirR, dirC].PlacedStone.IsBlack == _isBlackTurn)
                     {
                         List<Stone> lineTurnOverStones = new List<Stone>();
                         int r = dirR - i;
                         int c = dirC - k;
                         while (true)
                         {
-                            if (r == boardCube._row && c == boardCube._column)
+                            if (r == boardCube.Row && c == boardCube.Column)
                             {
                                 if (lineTurnOverStones.Count > 0)
                                 {
@@ -379,9 +346,9 @@ public class Reversi : MonoBehaviour
                                 }
                                 break;
                             }
-                            if (_boardCubes[r, c]._placedStone.IsWhite != _isWhiteTurn)
+                            if (_boardCubes[r, c].PlacedStone.IsBlack != _isBlackTurn)
                             {
-                                lineTurnOverStones.Add(_boardCubes[r, c]._placedStone);
+                                lineTurnOverStones.Add(_boardCubes[r, c].PlacedStone);
                             }
                             r -= i;
                             c -= k;
@@ -396,25 +363,12 @@ public class Reversi : MonoBehaviour
         return turnOverStones.ToArray();
     }
 
-    public bool GetNowAuto()
+    /// <summary>
+    /// 現在のターンを自分が操作しているかどうか
+    /// </summary>
+    /// <returns></returns>
+    public bool GetControlNow()
     {
-        return _autoBlack && !_isWhiteTurn || _autoWhite && _isWhiteTurn ? true : false;
+        return _blackControl && _isBlackTurn || _whiteControl && !_isBlackTurn ? true : false;
     }
-    //IEnumerable<BoardCube> GetNeighborBoardCubes(BoardCube boardCube)
-    //{
-    //    int row = boardCube._row;
-    //    int column = boardCube._column;
-    //    for (int i = -1; i <= 1; i++)
-    //    {
-    //        for (int k = -1; k <= 1; k++)
-    //        {
-    //            if (0 <= row + i && row + i < _rows && 0 <= column + k && column + k < _columns
-    //                && _boardCubes[row + i, column + k] != _boardCubes[row, column])
-    //            {
-    //                yield return _boardCubes[row + i, column + k];
-    //            }
-    //        }
-    //    }
-    //}
-
 }

@@ -45,9 +45,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f96d2c81d9da8e45b87b636fb873117, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _isWhite: 0
-  _moveTime: 0.5
-  _normalObject: {fileID: 4105496441876757366}
+  _isBlack: 1
+  _animeTime: 0.5
+  _dummyObject: {fileID: 4105496441876757366}
   _sameSideObject: {fileID: 3599490966185651490}
   _black: {fileID: 2100000, guid: bc105de6aab9cd74fb61d3c8b870d799, type: 2}
   _white: {fileID: 2100000, guid: 2885b486564029248a5d2a871777e9a7, type: 2}

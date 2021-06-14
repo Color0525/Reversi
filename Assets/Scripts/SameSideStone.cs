@@ -4,36 +4,29 @@ using UnityEngine;
 
 public class SameSideStone : Stone
 {
-    [SerializeField] GameObject _normalObject = null;
+    [SerializeField] GameObject _dummyObject = null;
     [SerializeField] GameObject _sameSideObject = null;
     [SerializeField] Material _black = null;
     [SerializeField] Material _white = null;
     
-    //static int _count = 3;
-    //public int Count
-    //{
-    //    get { return _count; }
-    //    set {_count = value;}
-    //}
-
     bool _first = true;
 
-    public override bool IsWhite
+    public override bool IsBlack
     {
-        get { return _isWhite; }
+        get { return _isBlack; }
         set
         {
             if (_first)
             {
                 _first = false;
-                _isWhite = value;
+                _isBlack = value;
                 OnColorChanged();
             }
             else
             {
-                _normalObject.SetActive(false);
+                _dummyObject.SetActive(false);
                 _sameSideObject.SetActive(true);
-                _sameSideObject.GetComponent<Renderer>().material = !_isWhite ? _black : _white;
+                _sameSideObject.GetComponent<Renderer>().material = _isBlack ? _black : _white;
             }
         }
     }
