@@ -38,16 +38,17 @@ public class Stone : MonoBehaviour
 
     protected void OnColorChanged()
     {
-        if (!_isWhite)
-        {
-            transform.rotation = Quaternion.identity;
-            //transform.DOLocalRotate(Vector3.zero, _moveTime);
-        }
-        else
-        {
-            transform.rotation = Quaternion.AngleAxis(180f, Vector3.forward);
-            //transform.DOLocalRotate(new Vector3(0, 0, 180f), _moveTime);
-        }
+        transform.rotation = !_isWhite ? Quaternion.identity : Quaternion.AngleAxis(180f, Vector3.forward);
+        //if (!_isWhite)
+        //{
+        //    transform.rotation = Quaternion.identity;
+        //    //transform.DOLocalRotate(Vector3.zero, _moveTime);
+        //}
+        //else
+        //{
+        //    transform.rotation = Quaternion.AngleAxis(180f, Vector3.forward);
+        //    //transform.DOLocalRotate(new Vector3(0, 0, 180f), _moveTime);
+        //}
     }
 
     public void PlaceMovement()
@@ -61,12 +62,18 @@ public class Stone : MonoBehaviour
         if (!_isWhite)
         {
             transform.rotation = Quaternion.AngleAxis(180f, Vector3.forward);
-            transform.DOLocalRotateQuaternion(Quaternion.identity, _moveTime);
+            transform.DOLocalRotateQuaternion(Quaternion.identity, _moveTime).OnComplete(() =>
+            {
+                FindObjectOfType<Reversi>().EndAnime = true;
+            });
         }
         else
         {
             transform.rotation = Quaternion.identity;
-            transform.DOLocalRotateQuaternion(Quaternion.AngleAxis(180f, Vector3.forward), _moveTime);
+            transform.DOLocalRotateQuaternion(Quaternion.AngleAxis(180f, Vector3.forward), _moveTime).OnComplete(() =>
+            {
+                FindObjectOfType<Reversi>().EndAnime = true;
+            });
         }
     }
 
