@@ -54,10 +54,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b63d53ae07cb3345a10ccafb870f184, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _selectStonePrefab: {fileID: 189218403161333724, guid: 1a483ed6c77678a49bd39585386d030c, type: 3}
-  _initialCount: 3
   _blackCount: 3
   _whiteCount: 3
+  _initialCount: 3
+  _selectStonePrefab: {fileID: 189218403161333724, guid: 1a483ed6c77678a49bd39585386d030c, type: 3}
   _backImage: {fileID: 8254721244812057909}
   _selectStoneImage: {fileID: 5711306598997819488}
   _countText: {fileID: 7154168491266237749}

@@ -124,9 +124,9 @@ public class Reversi : MonoBehaviour
     }
 
     /// <summary>
-    /// Ä“xƒQ[ƒ€‚ğs‚¤
+    /// ‰Šú‰»
     /// </summary>
-    public void Retry()
+    public void Initialize()
     {
         foreach (var bc in _boardCubes)
         {

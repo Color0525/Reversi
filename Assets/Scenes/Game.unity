@@ -1060,7 +1060,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 2024967454}
         m_TargetAssemblyTypeName: Reversi, Assembly-CSharp
-        m_MethodName: Retry
+        m_MethodName: Initialize
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1591,7 +1591,7 @@ MonoBehaviour:
     m_LineSpacing: 1
   m_Text: 'Return
 
-    to Title'
+    to title'
 --- !u!222 &1389815520
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1725,7 +1725,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 50
+    m_FontSize: 40
     m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 0
@@ -1736,7 +1736,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: Retry
+  m_Text: 'One more
+
+    play'
 --- !u!222 &1780535156
 CanvasRenderer:
   m_ObjectHideFlags: 0

@@ -21,7 +21,8 @@ public class SelectStoneController : MonoBehaviour
 
     void Awake()
     {
-        _selectStoneObjectInitialRot = _selectStoneImage.rectTransform.localRotation;
+        //
+        _selectStoneObjectInitialRot = _backImage.rectTransform.localRotation;
         _reversi = FindObjectOfType<Reversi>();
     }
 
@@ -36,13 +37,13 @@ public class SelectStoneController : MonoBehaviour
     {
         if (_isSelected)
         {
-            Quaternion rot = Quaternion.AngleAxis(1f, Vector3.forward);
-            Quaternion q = _selectStoneImage.rectTransform.rotation;
-            _selectStoneImage.rectTransform.rotation = q * rot;
+            Quaternion rot = Quaternion.AngleAxis(3f, Vector3.forward);
+            Quaternion q = _backImage.rectTransform.rotation;
+            _backImage.rectTransform.rotation = q * rot;
         }
         else if (_selectStoneImage.rectTransform.rotation != _selectStoneObjectInitialRot)
         {
-            _selectStoneImage.rectTransform.rotation = _selectStoneObjectInitialRot;
+            _backImage.rectTransform.rotation = _selectStoneObjectInitialRot;
         }
     }
 
